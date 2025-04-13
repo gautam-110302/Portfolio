@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import aboutImage from "../../assets/about/aboutImage.png";
-import Roles from "./roles";
+import Roles from "./Roles";
+
 
 const About = () => {
   const about = useSelector((store)=>store.about);
