@@ -1,19 +1,33 @@
-// src/utils/getImagePath.js
-export const getImagePath = (relativePath) => {
-  // Keep basic validation
-  if (typeof relativePath !== 'string' || !relativePath) {
-     console.error("Invalid relativePath received:", relativePath);
-     return "";
+// src/utils/getImagePath.js (or rename to assetUtils.js)
+
+// Use a recursive glob pattern '**' to find all relevant files
+// in any subdirectory under /src/assets/
+// Include all file extensions you need (png, jpg, svg, mp4, webm, etc.)
+// 'eager: true' loads all modules upfront (good for smaller number of assets)
+// 'import: 'default'' directly imports the processed URL/path string
+const allAssetModules = import.meta.glob('/src/assets/**/*.{png,jpg,jpeg,svg,mp4,webm}', { eager: true, import: 'default' });
+
+export const getImagePath = (relativePathFromAssets) => {
+  // relativePathFromAssets is the path you store in your data,
+  // e.g., "skills/Cplusplus.png", "projects/socialize.png", "projects/socializeDemo.mp4"
+
+  // Construct the key that import.meta.glob uses (absolute path from root)
+  const key = `/src/assets/${relativePathFromAssets}`;
+
+  const resolvedPath = allAssetModules[key];
+
+  if (resolvedPath === undefined) {
+    // Log a warning if the asset wasn't found in the glob results
+    console.warn(`Asset not found via glob for key: ${key} (derived from path: ${relativePathFromAssets})`);
+    // Optional: You can log all available keys during debugging if needed:
+    // console.log('Available keys in glob:', Object.keys(allAssetModules));
+    return ""; // Return empty string or a placeholder image/video path
   }
-  try {
-    // Create the string first - this version works!
-    const pathArgument = `../assets/${relativePath}`;
-    const imageUrl = new URL(pathArgument, import.meta.url).href;
-    return imageUrl;
-  } catch (err) {
-    // Keep error logging for safety
-    console.error(`Image path error constructing URL for relativePath "${relativePath}":`, err);
-    console.error(`Base URL (import.meta.url) was: ${import.meta.url}`);
-    return "";
-  }
+
+  // Return the processed path string provided by Vite
+  return resolvedPath;
 };
+
+// You can keep the old name 'getImagePath' or rename it,
+// just make sure components import the correct name you export.
+// export const getImagePath = getAssetPath; // Optional alias if needed
